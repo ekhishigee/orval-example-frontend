@@ -2,13 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Task } from "@/data/schema";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Status } from "@/components/status";
+import { TaskResponseDto } from "@/api/backend/model";
 
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<TaskResponseDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
