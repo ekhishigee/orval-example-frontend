@@ -8,6 +8,7 @@
 
 export interface TaskResponseDto {
   createdAt: string;
+  id: number;
   status: string;
   title: string;
   updatedAt: string;
