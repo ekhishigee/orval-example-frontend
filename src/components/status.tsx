@@ -10,7 +10,7 @@ export const Status = ({ status }: { status: string }) => {
     );
   }
 
-  if (status === "in_progress") {
+  if (status === "in-progress") {
     return (
       <div className="flex w-[100px] items-center">
         <Timer className="mr-2 h-4 w-4 text-muted-foreground" />
