@@ -1,12 +1,14 @@
+import { useTasksControllerGetTasks } from "@/api/backend/tasks/tasks";
 import { columns } from "@/components/tasks/columns";
 import { DataTable } from "@/components/tasks/data-table";
 import { TaskForm } from "@/components/tasks/tasks-form";
 import { Button } from "@/components/ui/button";
-import { tasks } from "@/data/tasks";
 import { useState } from "react";
 
 export const TasksPage = () => {
   const [open, setOpen] = useState<boolean>(false);
+
+  const { data } = useTasksControllerGetTasks();
 
   return (
     <div className="h-full flex-1 flex-col space-y-8 p-8 flex">
@@ -21,7 +23,7 @@ export const TasksPage = () => {
           <Button onClick={() => setOpen(true)}>Create a new task</Button>
         </div>
       </div>
-      <DataTable data={tasks} columns={columns} />
+      <DataTable data={data ?? []} columns={columns} />
       <TaskForm open={open} onOpenChange={setOpen} />
     </div>
   );

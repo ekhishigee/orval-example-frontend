@@ -16,12 +16,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Task, taskSchema } from "@/data/schema";
+import { taskSchema } from "@/data/schema";
 import { useState } from "react";
 import { TaskForm } from "./tasks-form";
+import { TaskResponseDto } from "@/api/backend/model";
 
 interface DataTableRowActionsProps {
-  row: Row<Task>;
+  row: Row<TaskResponseDto>;
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
