@@ -10,18 +10,24 @@ import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { useEffect } from "react";
 import { TasksFormFields } from "./tasks-form-fields";
+import {
+  getTasksControllerGetTasksQueryKey,
+  useTasksControllerCreateTask,
+  useTasksControllerUpdateTask,
+} from "@/api/backend/tasks/tasks";
+import { TaskResponseDto } from "@/api/backend/model";
+import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   open?: boolean;
   onOpenChange?(open: boolean): void;
-  values?: {
-    id: number;
-    title: string;
-  };
+  values?: TaskResponseDto;
 };
 export const TaskForm = ({ open, onOpenChange, values }: Props) => {
-  const { form } = useTaskForm();
+  const queryClient = useQueryClient();
 
+  const { form } = useTaskForm();
   const title = form.watch("title");
 
   useEffect(() => {
@@ -36,9 +42,35 @@ export const TaskForm = ({ open, onOpenChange, values }: Props) => {
     }
   }, [open]);
 
+  const { mutate: create, isPending: isPendingCreate } =
+    useTasksControllerCreateTask({
+      mutation: {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: getTasksControllerGetTasksQueryKey(),
+          });
+          onOpenChange?.(false);
+        },
+      },
+    });
+  const { mutate: update, isPending: isPendingUpdate } =
+    useTasksControllerUpdateTask({
+      mutation: {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: getTasksControllerGetTasksQueryKey(),
+          });
+          onOpenChange?.(false);
+        },
+      },
+    });
+
   const onSubmit = () => {
-    console.log("Task:", title);
-    onOpenChange?.(false);
+    if (values?.id) {
+      update({ id: `${values.id}`, data: { ...values, title } });
+    } else {
+      create({ data: { title } });
+    }
   };
 
   return (
@@ -54,7 +86,12 @@ export const TaskForm = ({ open, onOpenChange, values }: Props) => {
           </Form>
         </div>
         <DialogFooter>
-          <Button onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+          <Button onClick={() => form.handleSubmit(onSubmit)()}>
+            {(isPendingCreate || isPendingUpdate) && (
+              <Loader2 className="animate-spin w-2 h-2" />
+            )}
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

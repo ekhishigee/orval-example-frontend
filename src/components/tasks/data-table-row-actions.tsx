@@ -20,22 +20,45 @@ import { taskSchema } from "@/data/schema";
 import { useState } from "react";
 import { TaskForm } from "./tasks-form";
 import { TaskResponseDto } from "@/api/backend/model";
+import {
+  getTasksControllerGetTasksQueryKey,
+  useTasksControllerDeleteTask,
+  useTasksControllerUpdateTask,
+} from "@/api/backend/tasks/tasks";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DataTableRowActionsProps {
   row: Row<TaskResponseDto>;
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
+  const queryClient = useQueryClient();
+
   const task = taskSchema.parse(row.original);
   const [open, setOpen] = useState<boolean>(false);
 
+  const { mutate: deleteTask } = useTasksControllerDeleteTask({
+    mutation: {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: getTasksControllerGetTasksQueryKey(),
+        });
+      },
+    },
+  });
+  const { mutate: updateTask } = useTasksControllerUpdateTask({
+    mutation: {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: getTasksControllerGetTasksQueryKey(),
+        });
+      },
+    },
+  });
+
   return (
     <DropdownMenu>
-      <TaskForm
-        open={open}
-        onOpenChange={setOpen}
-        values={{ id: row.original.id, title: row.original.title }}
-      />
+      <TaskForm open={open} onOpenChange={setOpen} values={row.original} />
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -52,20 +75,47 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           <DropdownMenuSubTrigger>Statuses</DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuRadioGroup value={task.status}>
-              <DropdownMenuRadioItem key="todo" value="todo">
+              <DropdownMenuRadioItem
+                key="todo"
+                value="todo"
+                onClick={() =>
+                  updateTask({
+                    id: `${task.id}`,
+                    data: { ...row.original, status: "todo" },
+                  })
+                }
+              >
                 Todo
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem key="in-progress" value="in-progress">
+              <DropdownMenuRadioItem
+                key="in-progress"
+                value="in-progress"
+                onClick={() =>
+                  updateTask({
+                    id: `${task.id}`,
+                    data: { ...row.original, status: "in-progress" },
+                  })
+                }
+              >
                 In Progress
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem key="done" value="done">
+              <DropdownMenuRadioItem
+                key="done"
+                value="done"
+                onClick={() =>
+                  updateTask({
+                    id: `${task.id}`,
+                    data: { ...row.original, status: "done" },
+                  })
+                }
+              >
                 Done
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => deleteTask({ id: `${task.id}` })}>
           Delete
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
         </DropdownMenuItem>
