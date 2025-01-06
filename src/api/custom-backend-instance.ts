@@ -3,7 +3,7 @@ import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 const baseURL = env.VITE_BACKEND_BASE_URL;
 
-export const AXIOS_INSTANCE = Axios.create({ baseURL, withCredentials: true });
+export const AXIOS_INSTANCE = Axios.create({ baseURL });
 
 export const customBackendInstance = <T>(
   config: AxiosRequestConfig
